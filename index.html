@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Launch Website</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: sans-serif;
+      background: radial-gradient(circle at center, #ffcc00, #ff6600, #ff0000);
+      background-size: 200% 200%;
+      animation: smoothTieDye 15s ease-in-out infinite alternate;
+      transition: background 1s ease-in-out;
+    }
+
+    @keyframes smoothTieDye {
+      0% {
+        background-position: center;
+        background: radial-gradient(circle at center, #ffcc00, #ff6600, #ff0000);
+      }
+      50% {
+        background-position: top left;
+        background: radial-gradient(circle at top left, #ff6600, #ff0000, #ffcc00);
+      }
+      100% {
+        background-position: bottom right;
+        background: radial-gradient(circle at bottom right, #ff0000, #ffcc00, #ff6600);
+      }
+    }
+
+    button {
+      padding: 15px 30px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      background-color: white;
+      color: #ff3300;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease, background-color 0.3s ease;
+    }
+
+    button:hover {
+      transform: scale(1.08);
+      background-color: #ffe6e0;
+    }
+  </style>
+</head>
+<body>
+
+  <button onclick="window.open('https://somethingso.netlify.app', '_blank')">
+    Proxy
+  </button>
+
+</body>
+</html>
