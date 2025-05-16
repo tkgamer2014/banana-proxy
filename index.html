@@ -1,22 +1,49 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Launch Website</title>
+  <meta charset="UTF-8" />
+  <title>Proxy Launcher</title>
   <style>
+    :root {
+      --bg-color: #f0f0f0;
+      --text-color: #000;
+      --input-bg: #eaffea;
+      --input-border: #00aa00;
+      --input-text: #006600;
+      --button-bg: white;
+      --button-text: #ff3300;
+      --button-hover: #ffe6e0;
+    }
+
+    body.dark {
+      --bg-color: #121212;
+      --text-color: #ffffff;
+      --input-bg: #1f3321;
+      --input-border: #00ff7f;
+      --input-text: #adff2f;
+      --button-bg: #333;
+      --button-text: #ff6347;
+      --button-hover: #444;
+    }
+
     html, body {
       height: 100%;
       margin: 0;
       padding: 0;
       font-family: sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
       display: flex;
       flex-direction: column;
       align-items: center;
-      background-color: #f0f0f0; /* Optional: Plain background color */
+      justify-content: center;
     }
 
     .container {
-      margin-top: 40px;
       text-align: center;
+      padding: 20px;
+      max-width: 800px;
+      width: 100%;
     }
 
     .input-container {
@@ -27,14 +54,22 @@
       margin: 20px 0;
     }
 
-    input[type="text"] {
+    input[type="text"], select {
       padding: 10px;
       font-size: 16px;
-      width: 300px;
       border-radius: 8px;
-      border: 2px solid #00aa00;
-      background-color: #eaffea;
-      color: #006600;
+      border: 2px solid var(--input-border);
+      background-color: var(--input-bg);
+      color: var(--input-text);
+    }
+
+    input[type="text"] {
+      width: 300px;
+    }
+
+    select {
+      min-width: 200px;
+      max-width: 300px;
     }
 
     button {
@@ -42,8 +77,8 @@
       font-size: 18px;
       border: none;
       border-radius: 8px;
-      background-color: white;
-      color: #ff3300;
+      background-color: var(--button-bg);
+      color: var(--button-text);
       font-weight: bold;
       cursor: pointer;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -52,22 +87,70 @@
 
     button:hover {
       transform: scale(1.08);
-      background-color: #ffe6e0;
+      background-color: var(--button-hover);
     }
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      border-radius: 10px;
+    .toggle-container {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toggle-container input[type="checkbox"] {
+      width: 40px;
+      height: 20px;
+      appearance: none;
+      background: #ccc;
+      border-radius: 20px;
+      position: relative;
+      cursor: pointer;
+      outline: none;
+      transition: background 0.3s ease;
+    }
+
+    .toggle-container input[type="checkbox"]:checked {
+      background: #00cc66;
+    }
+
+    .toggle-container input[type="checkbox"]::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border-radius: 50%;
+      top: 1px;
+      left: 1px;
+      transition: transform 0.3s ease;
+    }
+
+    .toggle-container input[type="checkbox"]:checked::before {
+      transform: translateX(20px);
+    }
+
+    .toggle-container label {
+      font-size: 14px;
+      color: var(--text-color);
     }
   </style>
 </head>
 <body>
 
+  <div class="toggle-container">
+    <label for="darkModeToggle">Dark Mode</label>
+    <input type="checkbox" id="darkModeToggle">
+  </div>
+
   <div class="container">
-    <!-- Button for static proxy site -->
-    <button onclick="openProxy()">Proxy</button>
+    <!-- Proxy search + dropdown + launch button -->
+    <div class="input-container" style="margin-bottom: 40px;">
+      <input type="text" id="proxySearch" placeholder="Search Proxies..." oninput="filterProxies()">
+      <select id="proxySelect"></select>
+      <button onclick="launchSelectedProxy()">Launch Proxy</button>
+    </div>
 
     <!-- Search bar and button to load URL -->
     <div class="input-container">
@@ -77,47 +160,89 @@
   </div>
 
   <script>
-    function openProxy() {
-      // Open a new tab
+    const toggle = document.getElementById('darkModeToggle');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    toggle.addEventListener('change', () => {
+      document.body.classList.toggle('dark', toggle.checked);
+      localStorage.setItem('theme', toggle.checked ? 'dark' : 'light');
+    });
+
+    const proxies = [
+      { name: "sm.ix.tc 😎", url: "https://sm.ix.tc/" },
+      { name: "Shadow", url: "https://spanish.bsfa.info/" },
+      { name: "Banana Unbloker", url: "https://banana.goes-to.jbworks.com" },
+      { name: "Doge Unbloker", url: "https://inewize.broomleigh.org" }
+    ];
+
+    function populateProxyDropdown() {
+      const select = document.getElementById('proxySelect');
+      select.innerHTML = '';
+      proxies.forEach(proxy => {
+        const option = document.createElement('option');
+        option.value = proxy.url;
+        option.textContent = proxy.name;
+        select.appendChild(option);
+      });
+    }
+
+    function filterProxies() {
+      const search = document.getElementById('proxySearch').value.toLowerCase();
+      const select = document.getElementById('proxySelect');
+      select.innerHTML = '';
+      proxies
+        .filter(proxy => proxy.name.toLowerCase().includes(search))
+        .forEach(proxy => {
+          const option = document.createElement('option');
+          option.value = proxy.url;
+          option.textContent = proxy.name;
+          select.appendChild(option);
+        });
+    }
+
+    function launchSelectedProxy() {
+      const select = document.getElementById('proxySelect');
+      const url = select.value;
+      if (!url) return;
+
       const newTab = window.open('', '_blank');
-      
-      // Dynamically create the iframe and inject it into the new tab
       newTab.document.write(`
         <!DOCTYPE html>
         <html>
-        <head>
-          <title>Proxy Site</title>
-        </head>
-        <body style="margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden;">
-          <iframe src="https://sm.ix.tc/" width="100%" height="100%"></iframe>
+        <head><title>Proxy Site</title></head>
+        <body style="margin:0;padding:0;">
+          <iframe src="${url}" width="100%" height="100%" style="border:none;position:fixed;top:0;left:0;bottom:0;right:0;"></iframe>
         </body>
         </html>
       `);
-      newTab.document.close();  // Close the document stream
+      newTab.document.close();
     }
 
     function loadIframe() {
       const input = document.getElementById('urlInput').value.trim();
       if (!input) return;
 
-      // Make sure the URL has the proper protocol
       const url = input.startsWith('http://') || input.startsWith('https://') ? input : 'https://' + input;
-
-      // Open a new tab with the URL
       const newTab = window.open('', '_blank');
       newTab.document.write(`
         <!DOCTYPE html>
         <html>
-        <head>
-          <title>Loading...</title>
-        </head>
-        <body style="margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh;">
-          <iframe src="${url}" width="100%" height="100%" style="border: none; border-radius: 10px;"></iframe>
+        <head><title>Loading...</title></head>
+        <body style="margin:0;padding:0;">
+          <iframe src="${url}" width="100%" height="100%" style="border:none;position:fixed;top:0;left:0;bottom:0;right:0;"></iframe>
         </body>
         </html>
       `);
-      newTab.document.close();  // Close the document stream
+      newTab.document.close();
     }
+
+    window.onload = () => {
+      populateProxyDropdown();
+      if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && prefersDark)) {
+        document.body.classList.add('dark');
+        toggle.checked = true;
+      }
+    };
   </script>
 
 </body>
