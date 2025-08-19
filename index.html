@@ -15,7 +15,7 @@
       --button-hover: #ffe6e0;
     }
 
-    body.dark {
+    .dark {
       --bg-color: #121212;
       --text-color: #ffffff;
       --input-bg: #1f3321;
@@ -31,24 +31,12 @@
       margin: 0;
       padding: 0;
       font-family: sans-serif;
+      background-color: var(--bg-color);
       color: var(--text-color);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background-color: var(--bg-color);
-      position: relative;
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: var(--bg-color);
-      z-index: -1;
     }
 
     .container {
@@ -109,60 +97,42 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      font-size: 20px;
     }
 
     .toggle-container input[type="checkbox"] {
-      width: 40px;
-      height: 20px;
-      appearance: none;
-      background: #ccc;
-      border-radius: 20px;
-      position: relative;
+      display: none;
+    }
+
+    .toggle-icon {
       cursor: pointer;
-      outline: none;
-      transition: background 0.3s ease;
-    }
-
-    .toggle-container input[type="checkbox"]:checked {
-      background: #00cc66;
-    }
-
-    .toggle-container input[type="checkbox"]::before {
-      content: '';
-      position: absolute;
-      width: 18px;
-      height: 18px;
-      background: white;
-      border-radius: 50%;
-      top: 1px;
-      left: 1px;
+      font-size: 24px;
+      user-select: none;
+      color: var(--text-color);
       transition: transform 0.3s ease;
     }
 
-    .toggle-container input[type="checkbox"]:checked::before {
-      transform: translateX(20px);
-    }
-
-    .toggle-container label {
-      font-size: 14px;
-      color: var(--text-color);
+    .toggle-icon:hover {
+      transform: scale(1.2);
     }
   </style>
 </head>
 <body>
 
   <div class="toggle-container">
-    <label for="darkModeToggle">Dark Mode</label>
+    <span class="toggle-icon" id="themeIcon" title="Toggle Theme">🌙</span>
     <input type="checkbox" id="darkModeToggle">
   </div>
 
   <div class="container">
+    <!-- Proxy search + dropdown + launch button -->
     <div class="input-container" style="margin-bottom: 40px;">
       <input type="text" id="proxySearch" placeholder="Search Proxies..." oninput="filterProxies()">
       <select id="proxySelect"></select>
       <button onclick="launchSelectedProxy()">Launch Proxy</button>
     </div>
 
+    <!-- Search bar and button to load URL -->
     <div class="input-container">
       <input type="text" id="urlInput" placeholder="Enter a URL (e.g. https://example.com)">
       <button onclick="loadIframe()">Go</button>
@@ -171,18 +141,15 @@
 
   <script>
     const toggle = document.getElementById('darkModeToggle');
+    const icon = document.getElementById('themeIcon');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-    toggle.addEventListener('change', () => {
-      document.body.classList.toggle('dark', toggle.checked);
-      localStorage.setItem('theme', toggle.checked ? 'dark' : 'light');
-    });
-
     const proxies = [
-      { name: "sm.ix.tc 😎", url: "https://sm.ix.tc/" },
-      { name: "Shadow", url: "https://spanish.bsfa.info/" },
-      { name: "Banana Unbloker", url: "https://banana.goes-to.jbworks.com" },
-      { name: "Doge Unbloker", url: "https://inewize.broomleigh.org" }
+      { name: "Interstellar", url: "https://rc-1207.alcrb.ru/" },
+      { name: "Kahoot Proxy", url: "https://kahoot.com.de/" },
+      { name: "Ghost", url: "https://godhasleft.momgod.com/" },
+      { name: "Lunar", url: "https://lunaron.top/" },
+      { name: "Doge", url: "https://doge-oklahoma-fun.vercel.app/" }
     ];
 
     function populateProxyDropdown() {
@@ -194,6 +161,8 @@
         option.textContent = proxy.name;
         select.appendChild(option);
       });
+      // Default select Interstellar
+      select.selectedIndex = 0;
     }
 
     function filterProxies() {
@@ -246,12 +215,26 @@
       newTab.document.close();
     }
 
+    function updateIcon() {
+      const isDark = document.documentElement.classList.contains('dark');
+      icon.textContent = isDark ? '☀️' : '🌙';
+    }
+
+    icon.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      toggle.checked = isDark;
+      updateIcon();
+    });
+
     window.onload = () => {
       populateProxyDropdown();
-      if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && prefersDark)) {
-        document.body.classList.add('dark');
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        document.documentElement.classList.add('dark');
         toggle.checked = true;
       }
+      updateIcon();
     };
   </script>
 
